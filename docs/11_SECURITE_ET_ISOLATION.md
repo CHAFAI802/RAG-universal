@@ -159,11 +159,13 @@ Les ressources d'une organisation ne doivent pas être accessibles à une autre 
 
 L'organisation propriétaire d'une ressource et les acteurs autorisés à l'utiliser doivent rester identifiables séparément.
 
-## 7.2 Organisation et Tenant
+## 7.2 Organisation et contexte d'isolation
 
-`Organization` représente l'entité propriétaire des ressources. `Tenant` ou `Isolation Scope` représente un périmètre logique d'isolation.
+Pour le modèle conceptuel initial, `Organization` constitue la racine logique de propriété et d'isolation des ressources.
 
-Leur équivalence ou leur relation exacte n'est pas décidée dans cette spécification. Elle devra être déterminée avant la conception détaillée de l'isolation.
+L'expression `tenant context` peut désigner le contexte d'isolation transmis lors d'une opération. Elle ne désigne pas une entité `Tenant` indépendante dans le modèle initial. Une séparation future entre `Tenant` et `Organization` nécessitera un besoin explicite, une analyse d'impact et une décision architecturale documentée.
+
+Les mécanismes techniques et le niveau physique d'isolation restent à définir dans les décisions techniques correspondantes. Cette définition conceptuelle ne préjuge donc pas d'une stratégie de déploiement ou de stockage.
 
 ## 7.3 Périmètres à protéger
 
@@ -382,7 +384,7 @@ Cette correspondance ne signifie pas que la sécurité est limitée à ces exige
 
 Les sujets suivants nécessitent des décisions ou spécifications ultérieures :
 
-1. Relation exacte entre Organization et Tenant / Isolation Scope.
+1. Évaluer, si un besoin concret apparaît, l'opportunité de distinguer un Tenant ou un Isolation Scope de l'Organization. Le modèle initial retient Organization comme racine logique de propriété et d'isolation.
 2. Modèle précis de rôles, groupes, permissions et politiques.
 3. Mécanismes et protocoles d'authentification des identités humaines et applicatives.
 4. Gestion, stockage, rotation et révocation des secrets.

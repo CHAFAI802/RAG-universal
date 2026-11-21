@@ -2,7 +2,7 @@
 ## Cartographie des dépendances
 
 **Version :** 1.0
-**Statut :** Validated
+**Statut :** VALIDATED
 **Document :** DEPENDENCY_MAP.md
 
 ---
@@ -135,24 +135,24 @@ Ces exigences doivent être prises en compte dès la conception des interfaces.
 7. Toute modification d'une interface doit entraîner une analyse de ses impacts.
 8. Les exigences de sécurité doivent être intégrées transversalement.
 
-# 7. Ordre de conception proposé
+# 7. Phases de conception proposées (D0 à D13)
 
 | Phase | Travail | Prérequis |
 |---|---|---|
-| P0 | Vision et objectifs | Aucun |
-| P1 | Cahier des charges | P0 |
-| P2 | Architecture globale | P1 |
-| P3 | Architecture modulaire | P2 |
-| P4 | Modèle de données et sécurité | P2, P3 |
-| P5 | Knowledge Bases et API | P3, P4 |
-| P6 | Ingestion documentaire | P4, P5 |
-| P7 | Chunking et embeddings | P6 |
-| P8 | Recherche hybride | P5, P7 |
-| P9 | Génération LLM | P8 |
-| P10 | Données structurées | P4, P5, P8 |
-| P11 | Tests et évaluation | Selon composants concernés |
-| P12 | Déploiement et scalabilité | Architecture et validation |
-| P13 | Roadmap définitive | Ensemble des phases |
+| D0 | Vision et objectifs | Aucun |
+| D1 | Cahier des charges | D0 |
+| D2 | Architecture globale | D1 |
+| D3 | Architecture modulaire | D2 |
+| D4 | Modèle de données et sécurité | D2, D3 |
+| D5 | Knowledge Bases et API | D3, D4 |
+| D6 | Ingestion documentaire | D4, D5 |
+| D7 | Chunking et embeddings | D6 |
+| D8 | Recherche hybride | D5, D7 |
+| D9 | Génération LLM | D8 |
+| D10 | Données structurées | D4, D5, D8 |
+| D11 | Tests et évaluation | Selon composants concernés |
+| D12 | Déploiement et scalabilité | Architecture et validation |
+| D13 | Roadmap définitive | Ensemble des phases |
 
 Cet ordre est un ordre de conception proposé, pas une obligation de développer les composants dans le même ordre.
 

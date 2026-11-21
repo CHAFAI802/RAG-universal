@@ -3,7 +3,7 @@
 ## Document 02 — Architecture globale
 
 **Version :** 1.0
-**Statut :** Validated
+**Statut :** VALIDATED
 **Projet :** RAG-universal
 
 ---

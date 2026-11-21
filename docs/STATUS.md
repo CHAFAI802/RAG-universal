@@ -43,6 +43,24 @@ et indépendant des applications clientes.
 6. Toute modification architecturale doit être justifiée.
 7. Les documents dépendants doivent être actualisés après une décision ayant un impact sur leur contenu.
 
+## Audit du dépôt distant — 2026-11-21
+
+- Dépôt public : `CHAFAI802/RAG-universal`.
+- Branche de référence : `main`.
+- Commit audité : `e9e4b37d20e2520c3430e3a6bbeea8a2e6273663`.
+- Historique distant visible : un commit initial, sans parent.
+- Périmètre actuel : dépôt au stade documentaire, sans code applicatif
+  ni configuration d'exécution recensée. Les fichiers présents sont
+  principalement des spécifications Markdown et les fichiers auxiliaires
+  du dépôt. Aucun secret applicatif n'est attendu dans ce périmètre.
+- Points documentaires relevés : nomenclature des phases de conception clarifiée ;
+  définition de `Tenant` alignée sur le modèle conceptuel ; licence du dépôt encore
+  à décider explicitement.
+
 ## Prochaine étape
 
-Revue globale de cohérence documentaire, publication du dépôt Git et audit du dépôt distant.
+Préparer la phase P0 de réalisation décrite dans `15_ROADMAP_TECHNIQUE.md` :
+matrice de traçabilité exigences/capacités/tests, registre des décisions à instruire,
+étude comparative des options techniques, backlog initial et critères de Definition
+of Done. Aucun choix technologique ne doit être considéré comme validé avant décision
+explicite.

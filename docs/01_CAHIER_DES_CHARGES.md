@@ -1,11 +1,13 @@
-UNIVERSAL RAG ENGINE
+# UNIVERSAL RAG ENGINE
 
-Document 01 — Cahier des charges
+## Document 01 — Cahier des charges
 
-Version : 1.0
-Statut : Validated
-Date : 21 novembre 2026
-Projet : RAG-universal
+**Version :** 1.0
+**Statut :** VALIDATED
+**Date :** 21 novembre 2026
+**Projet :** RAG-universal
+
+---
 
 1. Introduction
 
@@ -117,7 +119,7 @@ Référence permettant de retrouver une source utilisée
 
 Tenant
 
-Espace logique correspondant à une organisation ou à un périmètre d'isolation
+Contexte d'isolation associé à une opération et déterminé à partir de l'Organization et des autorisations applicables. Il ne constitue pas une entité indépendante dans le modèle conceptuel initial.
 
 3. Classification des priorités
 

@@ -2,7 +2,7 @@
 ## Document 00 — Vision et objectifs
 
 **Version :** 1.0
-**Statut :** Validated
+**Statut :** VALIDATED
 **Projet :** RAG-universal
 
 ---

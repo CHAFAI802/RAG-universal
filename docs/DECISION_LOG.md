@@ -2,7 +2,7 @@
 ## Registre des décisions architecturales
 
 **Version :** 1.0
-**Statut :** Validated
+**Statut :** VALIDATED
 
 ---
 

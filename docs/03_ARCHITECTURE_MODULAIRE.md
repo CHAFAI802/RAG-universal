@@ -3,7 +3,7 @@
 ## Document 03 — Architecture modulaire
 
 **Version :** 1.0
-**Statut :** Validated
+**Statut :** VALIDATED
 **Projet :** RAG-universal
 
 ---
