@@ -1,0 +1,40 @@
+# Environnements et variables locales
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Construction et distribution
+build/
+dist/
+*.egg-info/
+
+# IDE et éditeurs
+.idea/
+.vscode/
+
+# Système
+.DS_Store
+Thumbs.db
+
+# Journaux
+*.log
+
+# Clés et certificats privés
+*.pem
+*.key
+*.p12
+*.pfx
