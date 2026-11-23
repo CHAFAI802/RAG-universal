@@ -7,8 +7,10 @@ from sqlalchemy import (
     DateTime,
     Enum as SQLAlchemyEnum,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     String,
+    UniqueConstraint,
     func,
     text,
 )
@@ -20,6 +22,13 @@ from app.core.base import Base
 
 class CredentialType(str, Enum):
     USERNAME_PASSWORD = "USERNAME_PASSWORD"
+
+
+class CredentialOwnerType(str, Enum):
+    """Type de propriétaire du credential, distinct de la méthode d'authentification."""
+
+    IDENTITY_ADMIN = "IDENTITY_ADMIN"
+    USER = "USER"
 
 
 class CredentialStatus(str, Enum):
@@ -39,6 +48,21 @@ class Credential(Base):
             "uq_credentials_username_ci",
             func.lower(text("username")),
             unique=True,
+        ),
+        UniqueConstraint(
+            "user_id",
+            name="uq_credentials_user_id",
+        ),
+        CheckConstraint(
+            "(owner_type = 'IDENTITY_ADMIN' AND user_id IS NULL) "
+            "OR (owner_type = 'USER' AND user_id IS NOT NULL)",
+            name="ck_credentials_owner_user_consistency",
+        ),
+        ForeignKeyConstraint(
+            ["identity_id", "user_id"],
+            ["users.identity_id", "users.user_id"],
+            name="fk_credentials_identity_user_users",
+            ondelete="RESTRICT",
         ),
     )
 
@@ -64,6 +88,22 @@ class Credential(Base):
             name="credential_type",
         ),
         nullable=False,
+    )
+
+    owner_type: Mapped[CredentialOwnerType] = mapped_column(
+        SQLAlchemyEnum(
+            CredentialOwnerType,
+            native_enum=False,
+            name="credential_owner_type",
+        ),
+        nullable=False,
+        default=CredentialOwnerType.IDENTITY_ADMIN,
+        server_default=text("'IDENTITY_ADMIN'"),
+    )
+
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        nullable=True,
     )
 
     username: Mapped[str] = mapped_column(

@@ -23,6 +23,7 @@ pluggy==1.7.0
 psycopg==3.3.9
 psycopg-binary==3.3.9
 pycparser==3.12
+PyJWT==2.15.1
 pydantic==2.14.4
 pydantic_core==2.50.5
 Pygments==2.21.0

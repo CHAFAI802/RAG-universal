@@ -3,9 +3,19 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db
+from app.modules.auth.authentication import (
+    AccountDisabledError,
+    AuthenticationService,
+    InvalidCredentialsError,
+)
 from app.modules.auth.registration import RegistrationService
 from app.modules.credentials.services import UsernameAlreadyExistsError
-from app.modules.auth.schemas import RegistrationRequest, RegistrationResponse
+from app.modules.auth.schemas import (
+    LoginRequest,
+    LoginResponse,
+    RegistrationRequest,
+    RegistrationResponse,
+)
 
 
 router = APIRouter(
@@ -58,4 +68,32 @@ def register(
         status=identity.status,
         created_at=identity.created_at,
         updated_at=identity.updated_at,
+    )
+
+
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+)
+def login(
+    payload: LoginRequest,
+    db: Session = Depends(get_db),
+) -> LoginResponse:
+    service = AuthenticationService(db)
+
+    try:
+        access_token = service.authenticate(
+            username=payload.username,
+            password=payload.password,
+        )
+    except (InvalidCredentialsError, AccountDisabledError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Identifiants invalides ou compte désactivé.",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+
+    return LoginResponse(
+        access_token=access_token,
+        expires_in=service.token_lifetime_seconds,
     )

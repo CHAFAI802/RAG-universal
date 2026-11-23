@@ -111,10 +111,11 @@ def test_create_human_identity_rejects_invalid_payload(client, payload):
     assert response.status_code == 422
 
 
-def test_only_identity_and_credential_tables_are_registered():
+def test_registered_tables_match_schema():
     assert set(Base.metadata.tables.keys()) == {
         "identities",
         "credentials",
+        "users",
     }
 
 

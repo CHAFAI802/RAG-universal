@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.credentials.models import (
     Credential,
+    CredentialOwnerType,
     CredentialType,
 )
 from app.modules.credentials.security import hash_password
@@ -31,7 +32,19 @@ class CredentialService:
         identity_id: uuid.UUID,
         username: str,
         password: str,
+        owner_type: CredentialOwnerType = CredentialOwnerType.IDENTITY_ADMIN,
+        user_id: uuid.UUID | None = None,
     ) -> Credential:
+
+        if owner_type == CredentialOwnerType.USER and user_id is None:
+            raise ValueError(
+                "Un credential User doit être associé à un User."
+            )
+
+        if owner_type == CredentialOwnerType.IDENTITY_ADMIN and user_id is not None:
+            raise ValueError(
+                "Un credential administrateur ne peut pas être associé à un User."
+            )
 
         if not isinstance(username, str):
             raise ValueError("Le username doit être une chaîne de caractères.")
@@ -64,6 +77,8 @@ class CredentialService:
         credential = Credential(
             identity_id=identity_id,
             credential_type=CredentialType.USERNAME_PASSWORD,
+            owner_type=owner_type,
+            user_id=user_id,
             username=normalized_username,
             password_hash=hash_password(password),
         )
