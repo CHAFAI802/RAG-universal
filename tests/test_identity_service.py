@@ -153,3 +153,64 @@ def test_refresh_error_rolls_back_after_flush(session, monkeypatch):
     identity = service.create_human_identity("After refresh failure")
 
     assert identity.display_name == "After refresh failure"
+def test_build_human_identity_does_not_persist(session):
+    service = IdentityService(session)
+
+    identity = service.build_human_identity("Test User")
+
+    assert identity.identity_id is not None
+    assert identity.identity_type == IdentityType.HUMAN
+    assert identity.display_name == "Test User"
+    assert identity.status == IdentityStatus.ACTIVE
+
+    # L'identité n'est ni ajoutée à la session ni enregistrée en base.
+    assert identity not in session
+    assert identity not in session.new
+
+    stored_identities = session.execute(
+        select(Identity)
+    ).scalars().all()
+
+    assert stored_identities == []
+
+
+def test_build_human_identity_trims_display_name(session):
+    service = IdentityService(session)
+
+    identity = service.build_human_identity("  Mabrouk Chafai  ")
+
+    assert identity.display_name == "Mabrouk Chafai"
+    assert identity not in session.new
+
+
+@pytest.mark.parametrize("display_name", ["", " ", "   "])
+def test_build_human_identity_rejects_empty_display_name(
+    session,
+    display_name,
+):
+    service = IdentityService(session)
+
+    with pytest.raises(ValueError, match="obligatoire"):
+        service.build_human_identity(display_name)
+
+    assert len(session.new) == 0
+
+
+def test_build_human_identity_rejects_display_name_longer_than_150_characters(
+    session,
+):
+    service = IdentityService(session)
+
+    with pytest.raises(ValueError, match="150 caractères"):
+        service.build_human_identity("A" * 151)
+
+    assert len(session.new) == 0
+
+
+def test_build_human_identity_accepts_150_characters(session):
+    service = IdentityService(session)
+
+    identity = service.build_human_identity("A" * 150)
+
+    assert len(identity.display_name) == 150
+    assert identity not in session.new

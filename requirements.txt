@@ -8,3 +8,4 @@ psycopg[binary]
 python-dotenv==1.2.4
 
 httpx2==2.16.2
+argon2-cffi==25.1.0

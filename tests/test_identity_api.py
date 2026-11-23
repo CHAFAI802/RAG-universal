@@ -10,6 +10,7 @@ from app.core.base import Base
 from app.core.dependencies import get_db
 from app.main import app
 from app.modules.identity.models import Identity, IdentityStatus, IdentityType
+from app.modules.credentials.models import Credential
 
 
 @pytest.fixture
@@ -110,8 +111,11 @@ def test_create_human_identity_rejects_invalid_payload(client, payload):
     assert response.status_code == 422
 
 
-def test_creation_does_not_create_other_identity_related_tables():
-    assert set(Base.metadata.tables.keys()) == {"identities"}
+def test_only_identity_and_credential_tables_are_registered():
+    assert set(Base.metadata.tables.keys()) == {
+        "identities",
+        "credentials",
+    }
 
 
 def test_creation_returns_only_identity_fields(client):
