@@ -33,6 +33,9 @@ Thumbs.db
 # Journaux
 *.log
 
+# Sources originales temporaires d'ingestion
+var/ingestion/temporary/
+
 # Clés et certificats privés
 *.pem
 *.key

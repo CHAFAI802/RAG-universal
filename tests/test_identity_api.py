@@ -116,6 +116,7 @@ def test_registered_tables_match_schema():
         "identities",
         "credentials",
         "users",
+        "ingestions",
     }
 
 

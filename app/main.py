@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app.modules.auth.routes import router as auth_router
 from app.modules.identity.routes import router as identity_router
+from app.modules.ingestion.routes import router as ingestion_router
 from app.modules.users.routes import router as users_router
 
 
@@ -17,6 +18,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(identity_router)
 app.include_router(users_router)
+app.include_router(ingestion_router)
 
 
 @app.exception_handler(RequestValidationError)

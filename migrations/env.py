@@ -7,6 +7,7 @@ from app.core.database import engine
 from app.modules.identity import models  # noqa: F401
 from app.modules.credentials import models as credential_models  # noqa: F401
 from app.modules.users import models as user_models  # noqa: F401
+from app.modules.ingestion import models as ingestion_models  # noqa: F401
 
 
 config = context.config

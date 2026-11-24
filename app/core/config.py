@@ -20,5 +20,24 @@ class Settings:
     AUTH_TOKEN_SECRET: str = os.getenv("AUTH_TOKEN_SECRET", "")
     AUTH_TOKEN_TTL_SECONDS: int = int(os.getenv("AUTH_TOKEN_TTL_SECONDS", "900"))
 
+    # Ingestion : réception et stockage temporaire des sources originales.
+    INGESTION_TEMP_STORAGE_PATH: str = os.getenv(
+        "INGESTION_TEMP_STORAGE_PATH",
+        str(BASE_DIR / "var" / "ingestion" / "temporary"),
+    )
+    INGESTION_MAX_FILE_SIZE_BYTES: int = int(
+        os.getenv("INGESTION_MAX_FILE_SIZE_BYTES", str(25 * 1024 * 1024))
+    )
+    INGESTION_ALLOWED_EXTENSIONS: str = os.getenv(
+        "INGESTION_ALLOWED_EXTENSIONS",
+        "pdf,docx,txt,csv,json,md,html,htm,xml,rtf,odt",
+    )
+    INGESTION_ABANDONED_FAILED_TTL_SECONDS: int = int(
+        os.getenv("INGESTION_ABANDONED_FAILED_TTL_SECONDS", str(7 * 24 * 3600))
+    )
+    INGESTION_ABANDONED_ORPHAN_TTL_SECONDS: int = int(
+        os.getenv("INGESTION_ABANDONED_ORPHAN_TTL_SECONDS", str(24 * 3600))
+    )
+
 
 settings = Settings()

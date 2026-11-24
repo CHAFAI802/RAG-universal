@@ -1,0 +1,197 @@
+RAPPORT D'IMPLEMENTATION - INGESTION DE RAG-UNIVERSAL
+Date : 2026-11-23
+
+1. ARCHITECTURE EXISTANTE EXAMINEE
+
+Le depot implemente une API FastAPI avec SQLAlchemy, PostgreSQL, des modules
+Auth, Identity, Credentials et Users. L'authentification existante emet des JWT
+dont le type distingue un administrateur d'Identity d'un User. La dependance
+get_authenticated_user verifie le token, le Credential, l'Identity et le User
+cote serveur. Le modele Ingestion et sa migration etaient deja presents dans
+les changements locaux au debut de cette mission; ils relient deja chaque
+ingestion au couple (identity_id, user_id).
+
+Les routes/services/modeles/tests des modules concernes ont ete examines.
+Aucune documentation existante du projet n'a ete consulte pour determiner le
+perimetre.
+
+2. FONCTIONNALITES D'INGESTION DEVELOPPEES
+
+- Creation d'une ingestion PENDING puis reception binaire en flux jusqu'a
+  RECEIVED, ou passage a FAILED avec un code et un message non sensible.
+- Reception du texte brut, de fichiers individuels, de fichiers CSV/JSON et
+  d'autres extensions configurees.
+- Support extensible des source_type; les sources locales et WEB peuvent
+  transmettre un identifiant de source.
+- Limite de taille configurable, calcul SHA-256, type detecte cote serveur,
+  dates et emplacement temporaire relatifs.
+- Validation des extensions, noms, contenus texte, JSON/XML, archives DOCX/ODT
+  et marqueurs PDF. Le MIME annonce par le client n'est pas utilise.
+- Consultation paginee des propres ingestions et telechargement authentifie
+  de la source originale.
+- Les fichiers de meme nom ont des identifiants et emplacements differents;
+  la publication du fichier final ne peut pas ecraser un fichier existant.
+
+3. ROUTES AJOUTEES
+
+- GET /api/v1/ingestions/folder-client : client navigateur local.
+- POST /api/v1/ingestions : cree les metadonnees d'une reception.
+- PUT /api/v1/ingestions/{ingestion_id}/source : recoit le contenu binaire en
+  streaming, sans le parser ni le stocker entierement en memoire.
+- POST /api/v1/ingestions/text?document_name=... : recoit du texte brut en
+  streaming.
+- GET /api/v1/ingestions : liste les ingestions du User courant.
+- GET /api/v1/ingestions/{ingestion_id} : retourne les metadonnees du
+  proprietaire uniquement.
+- GET /api/v1/ingestions/{ingestion_id}/source : restitue la source originale
+  au proprietaire uniquement.
+
+4. MECANISME LOCAL D'ACCES AUX DOSSIERS
+
+Le client servi par FastAPI utilise l'API navigateur showDirectoryPicker().
+Le navigateur ouvre son dialogue natif; apres la selection, l'utilisateur
+confirme une seconde fois avant le parcours et l'envoi. Le client parcourt
+recursivement les handles du dossier choisi, verifie leur appartenance par
+root.resolve(), et transmet chaque fichier separement. Il ne connait ni
+n'accede au disque du serveur comme s'il s'agissait du disque local.
+
+Les chemins envoyes sont relatifs au dossier autorise. Les chemins hors racine,
+les liens/refus d'acces signales par le navigateur et les fichiers caches sont
+refuses localement. Le serveur ne recoit aucun chemin absolu local.
+
+5. AUTORISATION EXPLICITE
+
+La page ne conserve le token que dans la memoire de la page, efface le champ du
+mot de passe apres la connexion, demande une selection native du dossier et
+exige une confirmation avant de parcourir son contenu. Les resultats par
+fichier distinguent recus, refuses et erreurs.
+
+6. AUTHENTIFICATION
+
+Aucune authentification n'a ete reimplementee. Les routes utilisent
+get_authenticated_user. Les tokens d'administrateur Identity et les tokens
+User sont distincts; un token administrateur ne permet pas l'ingestion.
+L'Identity, le User et le Credential proviennent du contexte JWT verifie et de
+la base, jamais d'un identity_id/user_id declare par le client.
+
+7. ISOLATION IDENTITY/USER
+
+Les requetes de lecture filtrent simultanement sur l'Identity et le User
+authentifies. Une ingestion d'un autre proprietaire renvoie 404. La dependance
+refuse les tokens invalides/expirés, les credentials desactives, les Identity
+desactivees et les Users desactives. La cle etrangere composite du modele
+Ingestion protege egalement l'association Identity/User.
+
+8. STOCKAGE TEMPORAIRE
+
+Le stockage temporaire est separe du Knowledge Storage, lequel n'a pas ete
+cree. L'organisation des fichiers est :
+<racine>/<identity_id>/<user_id>/<ingestion_id>/<nom>.
+Les repertoires sont limites aux permissions 0700 et les fichiers aux
+permissions 0600. Les chemins sont controles contre les traversals et liens
+symboliques. Aucun endpoint ne supprime une source originale apres reception.
+
+La commande `python -m app.modules.ingestion.cleanup` ne supprime que les
+fichiers partiels .part- anciens et marque comme FAILED les receptions PENDING
+ou RECEIVING abandonnees qui n'ont pas de source finale. Elle ne supprime
+aucune source finale ni les metadonnees des ingestions recues.
+
+9. MODELES ET MIGRATIONS
+
+Le modele Ingestion et la migration
+migrations/versions/4c9e2b7a1d3f_create_ingestions_table.py existaient deja
+dans les changements locaux initiaux. Aucun nouveau modele ni aucune nouvelle
+migration n'a ete necessaire. `alembic heads` a retourne
+`4c9e2b7a1d3f (head)`. Aucune migration Alembic n'a ete appliquee.
+
+10. TESTS ET VERIFICATIONS
+
+- `pytest -q tests/test_ingestion_api.py tests/test_ingestion_storage.py
+  tests/test_authentication_api.py` : 37 passed.
+- `pytest -q tests/test_identity_api.py` : 11 passed.
+- `pytest -q` avec DB_NAME explicitement fixe a rag_universal_test :
+  128 passed.
+- `pytest -q tests/test_ingestion_postgresql.py tests/test_users_postgresql.py
+  tests/test_authentication_postgresql.py`, avec DB_NAME=rag_universal_test :
+  3 passed.
+- Connexion en lecture seule : current_database() a retourne
+  rag_universal_test avant les tests PostgreSQL.
+- Le client navigateur a ete ouvert et son parcours JavaScript teste avec des
+  handles simules : parcours recursif, confirmation, deux fichiers recus et un
+  chemin exterieur refuse. showDirectoryPicker etait disponible dans le
+  navigateur de validation. Aucun dossier reel de l'utilisateur n'a ete ouvert.
+- `node --check` sur le JavaScript extrait du client : reussi.
+- Diagnostics Pylance sur les modules principaux d'ingestion : aucune erreur.
+- `git diff --check` : execute apres creation de ce rapport; resultat reporte
+  dans la reponse finale.
+
+Tous les tests PostgreSQL ont ete executes exclusivement sur
+rag_universal_test. Aucun test ni migration n'a cible rag_universal.
+
+11. CONFLITS AVEC LE CODE EXISTANT
+
+Le depot ne contenait pas de client frontend. Le choix demande a l'utilisateur
+a ete le client navigateur minimal servi par FastAPI. Le test existant de
+tables Identity a ete actualise pour tenir compte de la table Ingestion.
+
+Les modifications locales initiales dans app/core/config.py et
+migrations/env.py, ainsi que le modele/migration Ingestion non suivis, ont ete
+conserves et integres. La methode preexistante delete_relative_path, qui
+permettait la suppression arbitraire d'une source, a ete retiree du stockage;
+le nettoyage est limite aux fichiers partiels.
+
+12. PROBLEMES NON RESOLUS
+
+- Il n'y a pas de recuperation serveur de pages Web a partir d'une URL. Le type
+  WEB accepte une URL HTTPS comme metadonnee et peut recevoir les octets d'une
+  source via l'API generique, mais aucun connecteur ne telecharge l'URL. Un
+  fetcher arbitraire expose a des risques SSRF; il necessite une politique de
+  destinations publiques, DNS, redirections et limites de transfert.
+- Le client dossier exige un navigateur supportant showDirectoryPicker et un
+  contexte securise (HTTPS ou localhost). Aucun client CLI de remplacement
+  n'est fourni.
+- Le parcours navigateur a ete valide avec des handles simules; l'ouverture
+  reelle du dialogue du systeme d'exploitation n'a pas ete automatisee.
+- Les formats DOCX/ODT sont controles structurellement sans extraction; aucune
+  extraction/normalisation du contenu n'est realisee.
+
+13. FICHIERS MODIFIES ET CREES
+
+Modifies :
+- .gitignore
+- .env.example
+- app/main.py
+- app/modules/ingestion/file_validation.py
+- app/modules/ingestion/schemas.py
+- app/modules/ingestion/storage.py
+- tests/test_identity_api.py
+
+Creees :
+- INGESTION_IMPLEMENTATION_REPORT.txt
+- app/modules/ingestion/cleanup.py
+- app/modules/ingestion/folder_client.py
+- app/modules/ingestion/routes.py
+- app/modules/ingestion/services.py
+- tests/test_ingestion_api.py
+- tests/test_ingestion_postgresql.py
+- tests/test_ingestion_storage.py
+
+Le modele, la dependance d'authentification ingestion et la migration
+Ingestion existaient dans les changements locaux avant cette implementation;
+ils n'ont pas ete reecrits.
+
+14. PERIMETRE ET ETAT GIT
+
+Aucune extraction avancee, aucun nettoyage/normalisation, chunking, embedding,
+stockage/indexation vectorielle, retrieval, reranking, generation ou chat RAG
+n'a ete developpe. Aucun composant d'authentification, Identity, User ou
+Credentials n'a ete modifie.
+
+Etat Git initial :
+- M app/core/config.py
+- M migrations/env.py
+- ?? app/modules/ingestion/
+- ?? migrations/versions/4c9e2b7a1d3f_create_ingestions_table.py
+
+Aucun staging, commit ou push n'a ete effectue. L'etat final figure dans
+`git status --short` apres le controle final.
